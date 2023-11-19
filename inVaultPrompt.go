@@ -33,6 +33,8 @@ func editPassword(vault string) {
 	fmt.Println("enter your new password")
 	fmt.Scan(&newPassword)
 
+	encPassword, err := Encrypt(newPassword, getKey())
+
 	database, err := sql.Open("sqlite3", "pmg.db")
 	if err != nil {
 		panic(err)
@@ -41,10 +43,23 @@ func editPassword(vault string) {
 	if err != nil {
 		panic(err)
 	}
-	statement.Exec(newPassword, vault)
+	statement.Exec(encPassword, vault)
 
 	inVaultPrompt(vault, "your user name has been changed")
 
+}
+
+func deleteVault(vaultName string) {
+
+	database, err := sql.Open("sqlite3", "pmg.db")
+	if err != nil {
+		panic(err)
+	}
+	statement, err := database.Prepare("DELETE FROM Vault WHERE vaultName = ?")
+	if err != nil {
+		panic(err)
+	}
+	statement.Exec(vaultName)
 }
 
 func inVaultPrompt(vault string, status string) {
@@ -55,7 +70,7 @@ func inVaultPrompt(vault string, status string) {
 	}
 
 	Lable := "Select Operation"
-	Items := []string{"Copy user name", "Copy Password", "Edit user name", "Edit password", "exit"}
+	Items := []string{"Copy user name", "Copy Password", "Edit user name", "Edit password", "Delete", "exit"}
 
 	result, err := createPrompt(Lable, Items)
 	if err != nil {
@@ -92,7 +107,11 @@ func inVaultPrompt(vault string, status string) {
 		var password string
 		for rows.Next() {
 			rows.Scan(&password)
-			password = password
+			password, err = Decrypt(password, getKey())
+			if err != nil {
+				panic(err)
+			}
+
 		}
 
 		clipboard.WriteAll(password)
@@ -107,6 +126,9 @@ func inVaultPrompt(vault string, status string) {
 	} else if result == "Edit password" {
 
 		editPassword(vault)
+
+	} else if result == "Delete" {
+		deleteVault(vault)
 
 	}
 

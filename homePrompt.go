@@ -32,6 +32,8 @@ func createVault() {
 	fmt.Println("Password : Typer (r)If you want it to be auto generated")
 	fmt.Scan(&password)
 
+	encPassword, err := Encrypt(password, getKey())
+
 	rows, err := database.Query("SELECT vaultName FROM Vault WHERE vaultName = ?", vaultName)
 	if err != nil {
 		panic(err)
@@ -62,7 +64,7 @@ func createVault() {
 			panic(err)
 
 		}
-		statement.Exec(vaultName, userName, password)
+		statement.Exec(vaultName, userName, encPassword)
 
 	}
 }

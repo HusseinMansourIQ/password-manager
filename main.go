@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/manifoldco/promptui"
 	_ "github.com/mattn/go-sqlite3"
@@ -41,6 +42,8 @@ func main() {
 	//	panic(err)
 	//}
 	for {
+		fmt.Print(getKey())
+		fmt.Print("thiis is key -----------")
 
 		homePormpt("")
 
